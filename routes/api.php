@@ -8,9 +8,17 @@ use App\Http\Controllers\Admin\PeriodPaymentController;
 use App\Http\Controllers\Admin\PeriodPaymentPayerController;
 use App\Http\Controllers\Admin\StatsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Sync\SyncPayerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPayerController;
 use Illuminate\Support\Facades\Route;
+
+// Sync API – chráněno statickým API klíčem (X-Api-Key header)
+Route::group(['prefix' => 'sync', 'middleware' => 'api_key'], function () {
+    Route::get('payers/lookup', [SyncPayerController::class, 'lookup']);
+    Route::post('payers', [SyncPayerController::class, 'store']);
+    Route::put('payers/{payer}', [SyncPayerController::class, 'update']);
+});
 
 Route::post('/login', [AuthController::class, 'login']);
 
