@@ -147,6 +147,7 @@ class CheckBankPayments extends Command
         $options = [];
         $handler = strtolower(config('fio.http_handler'));
         $forceHttp1 = filter_var(config('fio.force_http1'), FILTER_VALIDATE_BOOL);
+        $handler = in_array($handler, ['curl', 'stream'], true) ? $handler : 'stream';
 
         if ($handler === 'curl') {
             $options['handler'] = HandlerStack::create();
@@ -155,7 +156,7 @@ class CheckBankPayments extends Command
         }
 
         if ($forceHttp1) {
-            $options['version'] = 1.1;
+            $options['version'] = '1.1';
         }
 
         return new Client($options);
