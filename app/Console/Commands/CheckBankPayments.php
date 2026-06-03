@@ -145,10 +145,12 @@ class CheckBankPayments extends Command
     private function createFioClient(): Client
     {
         $options = [];
-        $handler = strtolower((string) config('fio.http_handler', 'curl'));
+        $handler = strtolower((string) config('fio.http_handler', 'stream'));
 
         if ($handler === 'stream') {
             $options['handler'] = HandlerStack::create(new StreamHandler());
+        } elseif ($handler === 'curl') {
+            $options['handler'] = HandlerStack::create();
         }
 
         if (config('fio.force_http1')) {
