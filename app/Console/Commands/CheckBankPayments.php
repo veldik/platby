@@ -12,6 +12,9 @@ use App\Models\PaymentRecord;
 use App\Models\User;
 use App\Utils\ReplacementUtil;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\StreamHandler;
+use GuzzleHttp\HandlerStack;
 use Illuminate\Console\Command;
 use h4kuna\Fio;
 use Illuminate\Support\Facades\Mail;
@@ -50,7 +53,7 @@ class CheckBankPayments extends Command
                 "token" => config('fio.token'),
             ]];
 
-            $fioFactory = new Fio\FioFactory($account);
+            $fioFactory = new Fio\FioFactory($account, 'fio', $this->createFioClient());
 
             $fioRead = $fioFactory->createFioRead('fioAccount');
 
@@ -137,5 +140,21 @@ class CheckBankPayments extends Command
         }
 
         return Command::SUCCESS;
+    }
+
+    private function createFioClient(): Client
+    {
+        $options = [];
+        $handler = strtolower((string) config('fio.http_handler', 'curl'));
+
+        if ($handler === 'stream') {
+            $options['handler'] = HandlerStack::create(new StreamHandler());
+        }
+
+        if (config('fio.force_http1')) {
+            $options['version'] = 1.1;
+        }
+
+        return new Client($options);
     }
 }
